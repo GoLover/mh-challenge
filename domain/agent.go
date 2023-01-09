@@ -3,7 +3,6 @@ package domain
 import (
 	"fmt"
 	"math"
-	"time"
 )
 
 type Agent struct {
@@ -45,10 +44,10 @@ func (a *Agent) Goto(c Coordinatation) {
 			reportingChan <- Event{Type: AGENT_WALKED, Message: fmt.Sprintf("remained distance %d, for agent %d", remaindistance, a.Id), AgentId: a.Id}
 			if remaindistance == int(0) {
 				a.Location = c
-				reportingChan <- Event{Type: AGENT_RECEIVED, AgentId: a.Id, Message: fmt.Sprintf("Agent %d arrived to coordination %#v \n", a.Id, c)}
+				reportingChan <- Event{Type: AGENT_RECEIVED, AgentId: a.Id, Message: fmt.Sprintf("Agent %d arrived to coordination %#v", a.Id, c)}
 				break
 			}
-			time.Sleep(1 * time.Second)
+			//time.Sleep(1 * time.Second)
 			remaindistance -= int(1)
 		}
 	}(x, a.WalkieTalkie)

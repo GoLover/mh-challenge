@@ -45,13 +45,13 @@ func (cu *CenterUsecase) agentloop() {
 				panic(err)
 			}
 			fmt.Println(agentEvent.Message)
-			cu.continueJobProcess <- true
+			go func() { cu.continueJobProcess <- true }()
 		case domain.AGENT_SCHEDULED:
 			cu.availableAgents -= 1
 			cu.center.Agents[agentEvent.AgentId].MakeItBusy()
 			fmt.Println(agentEvent.Message)
 		case domain.AGENT_WALKED:
-			fmt.Println(agentEvent.Message)
+			//fmt.Println(agentEvent.Message)
 		}
 	}
 }

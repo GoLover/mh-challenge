@@ -8,7 +8,12 @@ import (
 )
 
 func main() {
-	router := gin.Default()
+	router := gin.New()
+	router.Use(
+		gin.LoggerWithWriter(gin.DefaultWriter, "/coordinate-agent"),
+		gin.Recovery(),
+	)
+
 	cmd.Boot(router)
 	router.Use(cors.New(cors.Config{AllowOrigins: []string{"*"},
 		AllowMethods: []string{"*"},
