@@ -15,7 +15,7 @@ func NewCenterUsecase(nubmerOfAgents int) *CenterUsecase {
 	for i < nubmerOfAgents {
 		agents[i] = &domain.Agent{Id: i,
 			Location:  domain.Coordinatation{XPOS: 0, YPOS: 0},
-			Available: true, NextLocationRemainingSteps: 0, WalkieTalkie: make(chan float64)}
+			Available: true, NextLocationRemainingSteps: 0, WalkieTalkie: make(chan int)}
 		i++
 	}
 	return &CenterUsecase{center: &domain.Center{Agents: agents}}
@@ -36,13 +36,18 @@ func (cu *CenterUsecase) CoordinateAgent(nextCoordination domain.Coordinatation)
 	}
 
 	var nearestAgentId = -1
-	var distaneOfAgent float64 = float64(0)
+	var distaneOfAgent = 0
 	//fmt.Println("length of available agents: ")
 	//fmt.Println(len(availableAgents))
 	for _, k := range availableAgents {
 		//fmt.Println("third for")
 		dtc := k.DistanceToCoordination(nextCoordination)
-		//fmt.Printf("number of dtc %f", dtc)
+		if dtc == 0 {
+			nearestAgentId = -1
+			fmt.Printf("agent number: %d is already in location.", k.Id)
+			break
+		}
+		//fmt.Printf("number of dtc %d", dtc)
 		if nearestAgentId == -1 {
 			distaneOfAgent = dtc
 			nearestAgentId = k.Id
@@ -52,19 +57,21 @@ func (cu *CenterUsecase) CoordinateAgent(nextCoordination domain.Coordinatation)
 			nearestAgentId = k.Id
 		}
 	}
-	//fmt.Printf("dta determined as: %f, and choosen agent is: %d", distaneOfAgent, nearestAgentId)
+	//fmt.Printf("dta determined as: %d, and choosen agent is: %d", distaneOfAgent, nearestAgentId)
 	for _, k := range availableAgents {
 		//fmt.Println("fifth for")
 		if k.Id != nearestAgentId {
 			k.MakeItAvailable()
 		}
 	}
-	//fmt.Println(nearestAgentId)
+	if nearestAgentId == -1 {
+		return
+	}
 	go cu.center.Agents[nearestAgentId].Goto(nextCoordination)
 	for {
 		//fmt.Println("sixth for")
 		remaining := <-cu.center.Agents[nearestAgentId].WalkieTalkie
-		fmt.Printf("remaining steps: %f, for agent: %d \n", remaining, nearestAgentId)
+		fmt.Printf("remaining steps: %d, for agent: %d \n", remaining, nearestAgentId)
 		if remaining == 0 {
 			break
 		}

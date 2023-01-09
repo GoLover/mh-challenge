@@ -10,7 +10,7 @@ type Agent struct {
 	Location                   Coordinatation
 	Available                  bool
 	NextLocationRemainingSteps int
-	WalkieTalkie               chan float64
+	WalkieTalkie               chan int
 }
 
 func (a *Agent) MakeItBusy() {
@@ -30,23 +30,25 @@ func (a Agent) IsAgentAvailable() bool {
 	return a.Available
 }
 
-func (a Agent) DistanceToCoordination(c Coordinatation) float64 {
+func (a Agent) DistanceToCoordination(c Coordinatation) int {
 	willingX := c.XPOS - a.Location.XPOS
 	willingY := c.YPOS - a.Location.YPOS
-	return math.Sqrt(math.Pow(float64(willingX), float64(2)) + math.Pow(float64(willingY), float64(2)))
+	return int(math.Sqrt(math.Pow(float64(willingX), float64(2)) + math.Pow(float64(willingY), float64(2))))
 }
 
 func (a *Agent) Goto(c Coordinatation) {
 	x := a.DistanceToCoordination(c)
-	go func(remaindistance float64, reportingChan chan<- float64) {
+	go func(remaindistance int, reportingChan chan<- int) {
 		for {
-			if remaindistance == float64(0) {
+			reportingChan <- remaindistance
+			if remaindistance == int(0) {
+				a.Location = c
 				break
 			}
 			time.Sleep(1 * time.Second)
-			remaindistance -= float64(1)
-			//fmt.Printf("goto remained,%f", remaindistance)
-			reportingChan <- remaindistance
+			remaindistance -= int(1)
+			//fmt.Printf("goto remained,%d", remaindistance)
+
 		}
 	}(x, a.WalkieTalkie)
 }
