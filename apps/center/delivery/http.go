@@ -38,6 +38,6 @@ func (h *Handler) coordinate(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, nil)
 		return
 	}
-	go h.u.CoordinateAgent(requestData.ToDomain())
+	go h.u.SubmitCoordinate(requestData.ToDomain())
 	ctx.JSON(http.StatusOK, nil)
 }

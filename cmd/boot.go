@@ -12,5 +12,6 @@ var cu domain.CenterUsecase
 
 func Boot(ginRouter *gin.Engine) {
 	cu := usecase.NewCenterUsecase(5)
+	go cu.CoordinateLoop()
 	delivery.New(ginRouter, cu)
 }

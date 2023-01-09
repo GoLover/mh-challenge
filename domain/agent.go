@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -10,7 +11,7 @@ type Agent struct {
 	Location                   Coordinatation
 	Available                  bool
 	NextLocationRemainingSteps int
-	WalkieTalkie               chan int
+	WalkieTalkie               chan Event
 }
 
 func (a *Agent) MakeItBusy() {
@@ -38,17 +39,17 @@ func (a Agent) DistanceToCoordination(c Coordinatation) int {
 
 func (a *Agent) Goto(c Coordinatation) {
 	x := a.DistanceToCoordination(c)
-	go func(remaindistance int, reportingChan chan<- int) {
+	a.WalkieTalkie <- Event{Type: AGENT_SCHEDULED, Message: fmt.Sprintf("agent %d scheduled for coordination of %#v", a.Id, c), AgentId: a.Id}
+	go func(remaindistance int, reportingChan chan<- Event) {
 		for {
-			reportingChan <- remaindistance
+			reportingChan <- Event{Type: AGENT_WALKED, Message: fmt.Sprintf("remained distance %d, for agent %d", remaindistance, a.Id), AgentId: a.Id}
 			if remaindistance == int(0) {
 				a.Location = c
+				reportingChan <- Event{Type: AGENT_RECEIVED, AgentId: a.Id, Message: fmt.Sprintf("Agent %d arrived to coordination %#v \n", a.Id, c)}
 				break
 			}
 			time.Sleep(1 * time.Second)
 			remaindistance -= int(1)
-			//fmt.Printf("goto remained,%d", remaindistance)
-
 		}
 	}(x, a.WalkieTalkie)
 }
